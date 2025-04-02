@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+    <script type="module" src="popup.js"></script>
+</head>
+<body>
+    <h1>Setting</h1>
+    
+    <div id="popup-container">
+        <input id="username" name="username" placeholder="Username" autocomplete="username" />
+        <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password"  />
+        
+        <label class="container">Agressive Mode?
+          <input type="checkbox" id="agressiveMode">
+          <span class="checkmark"></span>
+        </label>
+        <button id="saveButton">Save</button>
+    </div>
+    
+    <button id="logMeInButton" >
+        Log Me In
+    </button>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+    </div>
+
+</html>

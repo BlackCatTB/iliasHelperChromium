@@ -1,0 +1,161 @@
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #ffffff;
+    --background-light: #f9f9f9;
+    --background-dark: #1e1e2f;
+    --text-light: #2c3e50;
+    --text-dark: #ecf0f1;
+    --border-radius: 8px;
+    --shadow-light: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-dark: 0px 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+body {
+    width: 250px;
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: var(--background-light);
+    color: var(--text-light);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease-in-out;
+}
+
+body.dark {
+    background-color: var(--background-dark);
+    color: var(--text-dark);
+    box-shadow: var(--shadow-dark);
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+#popup-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background: var(--secondary-color);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 5px var(--primary-color);
+}
+
+label.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+label.container .checkmark {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    margin-left: 10px;
+    position: relative;
+    cursor: pointer;
+    background: var(--secondary-color);
+}
+
+input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"]:checked + .checkmark {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+button {
+    padding: 10px 15px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--secondary-color);
+    background: var(--primary-color);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: darken(var(--primary-color), 10%);
+}
+
+#logMeInButton {
+    margin-top: 10px;
+    width: 100%;
+}
+
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+.hidden {
+    display: none;
+    visibility: hidden;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: var(--background-dark);
+        color: var(--text-dark);
+    }
+
+    input {
+        background: var(--background-dark);
+        color: var(--text-dark);
+        border: 1px solid #444;
+    }
+
+    label.container .checkmark {
+        border-color: var(--text-dark);
+    }
+}
