@@ -62,9 +62,7 @@ The extension also includes a mechanism that checks if the tab has been inactive
 
 ## Security Considerations
 
-While the extension stores your credentials in the browser’s local storage, which isn't the most secure, it's a common method for storing extension data. Keep in mind that if someone gains control of your browser, they can access this data.
-
-**Important:** It’s recommended to use a secure password manager in conjunction with this extension for improved security.
+While the extension stores your credentials in the browser’s local storage, which isn't the most secure, it's a common method for storing extension data. Keep in mind that if someone gains control of your browser, they can access this data, but if they can view this data they will most likely also have access to the browsers password manager so you have to know for yourself if you find this okey.
 
 ## Known Issues
 
