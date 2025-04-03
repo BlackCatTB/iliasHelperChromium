@@ -1,6 +1,6 @@
 {
-  "name": "Hello Extensions",
-  "description": "Base Level Extension",
+  "name": "Ilias Helper",
+  "description": "Ilias Autologin",
   "version": "1.0",
   "manifest_version": 3,
   "permissions": ["storage", "tabs", "tab"],

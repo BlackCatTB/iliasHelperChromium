@@ -1,3 +1,20 @@
+function sendMessageToContentScript(message) {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length === 0) return;
+
+    chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
+      if (chrome.runtime.lastError) {
+        console.warn(
+          "Error sending message:",
+          chrome.runtime.lastError.message
+        );
+      } else {
+        console.log("Response from content script:", response);
+      }
+    });
+  });
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Received message:", message);
 
@@ -23,5 +40,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.action === "logMeIn") {
     if (chrome.tab) chrome.tabs.sendMessage(chrome.tab.id, { type: "refresh" });
     // chrome.tab.sendMessage(tab.id, { type: "refresh" });
+  } else if (message.action === "test") {
+    sendMessageToContentScript({
+      action: "greet",
+      data: "Hello from Background!",
+    });
   }
 });
