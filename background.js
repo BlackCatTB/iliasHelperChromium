@@ -39,11 +39,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   } else if (message.action === "logMeIn") {
     if (chrome.tab) chrome.tabs.sendMessage(chrome.tab.id, { type: "refresh" });
+    sendMessageToContentScript({ type: "refresh" });
     // chrome.tab.sendMessage(tab.id, { type: "refresh" });
   } else if (message.action === "test") {
     sendMessageToContentScript({
       action: "greet",
       data: "Hello from Background!",
     });
+  } else if (message.action === "setBadge") {
+    chrome.action.setBadgeText({ text: message.text });
+    chrome.action.setBadgeBackgroundColor({
+      color: message.text === "✔" ? "#008000" : "#ff0000",
+    });
+
+    // Remove badge after 3 seconds
+    setTimeout(() => {
+      chrome.action.setBadgeText({ text: "" });
+    }, 3000);
   }
 });
