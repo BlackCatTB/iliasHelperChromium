@@ -38,7 +38,3 @@ async function fetchSavedData() {
   });
 }
 fetchSavedData();
-
-document.getElementById("tester").addEventListener("click", () => {
-  chrome.runtime.sendMessage({ action: "test" });
-});
