@@ -1,4 +1,3 @@
-// popup.js
 console.log = (...args) =>
   chrome.runtime.sendMessage({ type: "test", message: args });
 
@@ -38,3 +37,26 @@ async function fetchSavedData() {
   });
 }
 fetchSavedData();
+
+// site permission enabler
+document
+  .getElementById("enableSiteButton")
+  .addEventListener("click", async () => {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    const url = new URL(tab.url);
+    const originPattern = `${url.origin}/*`;
+
+    chrome.permissions.request({ origins: [originPattern] }, (granted) => {
+      if (granted) {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["content.js"],
+        });
+      } else {
+        console.warn("User denied permission for:", originPattern);
+      }
+    });
+  });
