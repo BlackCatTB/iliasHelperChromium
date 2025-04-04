@@ -64,11 +64,13 @@ async function loginToILIAS() {
     hideLoginOverlay();
   });
 }
-var lastTimeRecorded = Date.now();
+var lastTimeRecorded = new Date.now();
 document.addEventListener("visibilitychange", () => {
-  if (Date.now() - lastTimeRecorded > 1800000) showLoginOverlay(); // after half an hour, wait two secs so you don't loose the current view
+  const nowTime = new Date.now();
+  if (nowTime - lastTimeRecorded < 120000) return; // don't do anything under 2 minutes
+  if (nowTime - lastTimeRecorded > 1800000) showLoginOverlay(); // after half an hour, wait two secs so you don't loose the current view
   if (document.visibilityState === "visible") loginToILIAS();
-  lastTimeRecorded = Date.now();
+  lastTimeRecorded = new Date.now();
 });
 
 function injectLoginOverlay() {
