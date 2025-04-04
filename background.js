@@ -58,3 +58,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }, 3000);
   }
 });
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status !== "complete" || !tab.url.startsWith("http")) return;
+
+  const url = new URL(tab.url);
+  const origin = url.origin + "/*";
+
+  chrome.permissions.contains({ origins: [origin] }, (hasPermission) => {
+    if (hasPermission) {
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ["content.js"],
+      });
+    }
+  });
+});

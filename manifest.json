@@ -1,20 +1,15 @@
 {
   "name": "Ilias Helper",
-  "description": "Ilias Autologin",
+  "description": "Ilias Auto-login helper with user-controlled site access.",
   "version": "1.0",
   "manifest_version": 3,
-  "permissions": ["storage", "tabs", "tab"],
+  "permissions": ["storage", "tabs", "scripting", "activeTab"],
+  "optional_host_permissions": ["https://*/*"],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
     "default_popup": "popup.html",
     "default_icon": "logo_128.png"
-  },
-  "content_scripts": [
-    {
-      "js": ["content.js"],
-      "matches": ["https://ilias*"]
-    }
-  ]
+  }
 }

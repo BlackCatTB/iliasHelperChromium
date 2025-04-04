@@ -31,8 +31,8 @@ async function fetchSavedData() {
       return console.error(chrome.runtime.lastError);
     document.getElementById("username").value = response.username || "";
     document.getElementById("password").value = response.password || "";
-    document.getElementById("agressiveMode").checked =
-      response.agressiveMode || false;
+    // document.getElementById("agressiveMode").checked =
+    //   response.agressiveMode || false;
     hideLoadingOverlay();
   });
 }
