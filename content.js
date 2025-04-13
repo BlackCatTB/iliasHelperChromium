@@ -9,13 +9,24 @@ const KNOWN_LOGIN_SITES = {
     method: "form",
     loginUrl:
       "https://ilias3.uni-stuttgart.de/ilias.php?baseClass=ilstartupgui&cmd=post&fallbackCmd=doStandardAuthentication&lang=de&client_id=Uni_Stuttgart",
+    default_landing_url: "",
     usernameField: "login_form/input_3/input_4",
     passwordField: "login_form/input_3/input_5",
+  },
+  "www.ilias.uni-koeln.de": {
+    method: "form",
+    loginUrl:
+      "https://www.ilias.uni-koeln.de/ilias/ilias.php?lang=de&client_id=uk&cmd=post&cmdClass=ilstartupgui&cmdNode=12k&baseClass=ilStartUpGUI&rtoken=",
+    default_landing_url: "",
+    usernameField: "username",
+    passwordField: "password",
+    extraFields: ["cmd[doStandardAuthentication]", "Anmelden"],
   },
   "ilias.your-university.de": {
     method: "form",
     loginUrl:
       "https://ilias.your-university.de/ilias.php?baseClass=ilstartupgui&cmd=post",
+    default_landing_url: "",
     usernameField: "user",
     passwordField: "pass",
   },
@@ -44,6 +55,23 @@ async function loginToILIAS() {
     formData.append(formUsername, response.username);
     formData.append(formPassword, response.password);
 
+    if (
+      KNOWN_LOGIN_SITES[currentHost] &&
+      KNOWN_LOGIN_SITES[currentHost].extraFields.length != 0
+    ) {
+      for (
+        let i = 0;
+        i < KNOWN_LOGIN_SITES[currentHost].extraFields.length;
+        i += 2
+      ) {
+        const key = KNOWN_LOGIN_SITES[currentHost].extraFields[i];
+        const value = KNOWN_LOGIN_SITES[currentHost].extraFields[i + 1];
+        if (key && value) {
+          formData.append(key, value);
+        }
+      }
+    }
+
     const fetchOptions = {
       method: "POST",
       headers: {
@@ -64,13 +92,13 @@ async function loginToILIAS() {
     hideLoginOverlay();
   });
 }
-var lastTimeRecorded = new Date.now();
+var lastTimeRecorded = Date.now();
 document.addEventListener("visibilitychange", () => {
-  const nowTime = new Date.now();
+  const nowTime = Date.now();
   if (nowTime - lastTimeRecorded < 120000) return; // don't do anything under 2 minutes
   if (nowTime - lastTimeRecorded > 1800000) showLoginOverlay(); // after half an hour, wait two secs so you don't loose the current view
   if (document.visibilityState === "visible") loginToILIAS();
-  lastTimeRecorded = new Date.now();
+  lastTimeRecorded = Date.now();
 });
 
 function injectLoginOverlay() {
