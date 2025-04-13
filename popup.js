@@ -4,11 +4,11 @@ console.log = (...args) =>
 document.getElementById("saveButton").addEventListener("click", () => {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
-  const agressiveMode = document.getElementById("agressiveMode").checked;
+  // const agressiveMode = document.getElementById("agressiveMode").checked;
 
   chrome.runtime.sendMessage({
     action: "saveData",
-    data: { username, password, agressiveMode },
+    data: { username, password /* , agressiveMode */ },
   });
 });
 

@@ -22,12 +22,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ data: message.data, message: "hello" });
   } else if (message.action === "requestData") {
     chrome.storage.local.get(
-      ["username", "password", "agressiveMode"],
+      ["username", "password" /* , "agressiveMode" */],
       (data) => {
         sendResponse({
           username: data.username,
           password: data.password,
-          agressiveMode: data.agressiveMode,
+          /* agressiveMode: data.agressiveMode, */
         });
       }
     );
