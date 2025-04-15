@@ -23,6 +23,7 @@ body {
   box-shadow: var(--shadow-light);
   transition: all 0.3s ease-in-out;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
