@@ -85,7 +85,10 @@ async function loginToILIAS() {
       chrome.runtime.sendMessage({ action: "setBadge", text: "✔" });
       if (
         window.location.href.includes("login.php") ||
-        window.location.href.includes("?cmd=force_login")
+        window.location.href.includes("?cmd=force_login") ||
+        window.location.href.includes(
+          "baseClass=ilrepositorygui&reloadpublic=1&cmd=&ref_id=1"
+        )
       ) {
         window.location.href = "/";
       }
@@ -96,10 +99,8 @@ async function loginToILIAS() {
   });
 }
 
-let firstLoad = true;
-
-if (firstLoad) {
-  firstLoad = false;
+if (!sessionStorage.getItem("alreadyLoaded")) {
+  sessionStorage.setItem("alreadyLoaded", "true");
   showLoginOverlay();
   loginToILIAS();
 }
