@@ -83,12 +83,27 @@ async function loginToILIAS() {
     console.log(res.ok ? "Login successful" : "Login failed", res.statusText);
     if (res.ok) {
       chrome.runtime.sendMessage({ action: "setBadge", text: "✔" });
+      if (
+        window.location.href.includes("login.php") ||
+        window.location.href.includes("?cmd=force_login")
+      ) {
+        window.location.href = "/";
+      }
     } else {
       chrome.runtime.sendMessage({ action: "setBadge", text: "✘" });
     }
     hideLoginOverlay();
   });
 }
+
+let firstLoad = true;
+
+if (firstLoad) {
+  firstLoad = false;
+  showLoginOverlay();
+  loginToILIAS();
+}
+
 var lastTimeRecorded = Date.now();
 document.addEventListener("visibilitychange", () => {
   const nowTime = Date.now();
