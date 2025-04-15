@@ -41,11 +41,11 @@ async function loginToILIAS() {
 
   const formUsername = KNOWN_LOGIN_SITES[currentHost]
     ? KNOWN_LOGIN_SITES[currentHost].usernameField
-    : "login_form/input_3/input_4";
+    : "username";
 
   const formPassword = KNOWN_LOGIN_SITES[currentHost]
     ? KNOWN_LOGIN_SITES[currentHost].passwordField
-    : "login_form/input_3/input_5";
+    : "password";
 
   chrome.runtime.sendMessage({ action: "requestData" }, async (response) => {
     if (!response.username || !response.password)
