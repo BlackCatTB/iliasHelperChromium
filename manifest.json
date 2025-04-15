@@ -1,7 +1,7 @@
 {
   "name": "Ilias Helper",
   "description": "Ilias Auto-login helper with user-controlled site access.",
-  "version": "1.1.2",
+  "version": "1.1.5",
   "manifest_version": 3,
   "permissions": ["storage", "tabs", "scripting", "activeTab"],
   "optional_host_permissions": ["https://*/*"],
