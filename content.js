@@ -55,10 +55,7 @@ async function loginToILIAS() {
     formData.append(formUsername, response.username);
     formData.append(formPassword, response.password);
 
-    if (
-      KNOWN_LOGIN_SITES[currentHost] &&
-      KNOWN_LOGIN_SITES[currentHost].extraFields.length != 0
-    ) {
+    if (KNOWN_LOGIN_SITES[currentHost]?.extraFields?.length > 0) {
       for (
         let i = 0;
         i < KNOWN_LOGIN_SITES[currentHost].extraFields.length;
