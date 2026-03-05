@@ -2,28 +2,33 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="popup.css">
-    <script type="module" src="popup.js"></script>
+    <script src="shared/runtime.js"></script>
+    <script src="shared/loginProfiles.js"></script>
+    <script defer src="popup.js"></script>
 </head>
 <body>
-    <h1>Setting</h1>
-    
-    <div id="popup-container">
-        <input id="username" name="username" placeholder="Username" autocomplete="username" />
-        <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password"  />
-        
-        <!-- <label class="container">Agressive Mode?
-          <input type="checkbox" id="agressiveMode">
-          <span class="checkmark"></span>
-        </label> -->
-        <button id="saveButton">Save</button>
-    </div>
-    
-    <button id="logMeInButton" >
-        Log Me In
-    </button>
-    
-    <button id="enableSiteButton">Enable on this site</button>
+    <h1>ILIAS Helper</h1>
+    <p id="hostLabel" class="hint">No active host detected</p>
+
+    <form id="credentialsForm" autocomplete="on">
+        <input id="username" name="username" placeholder="Username" autocomplete="username" autocapitalize="off" spellcheck="false" />
+        <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password" />
+
+        <label class="toggle">
+            <input type="checkbox" id="autoRefreshOnVisibility">
+            <span>Refresh after tab inactivity</span>
+        </label>
+
+        <button id="saveButton" type="submit">Save for this host</button>
+    </form>
+
+    <button id="logMeInButton" type="button">Log in now</button>
+    <button id="enableSiteButton" type="button">Enable on this site</button>
+    <button id="openOptionsButton" type="button" class="secondary">Open full settings</button>
+
+    <p id="status" class="hint" aria-live="polite"></p>
 
 
     <!-- Loading Overlay -->

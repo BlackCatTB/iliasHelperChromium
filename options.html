@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ILIAS Helper Settings</title>
+    <link rel="stylesheet" href="popup.css">
+    <script src="shared/runtime.js"></script>
+    <script src="shared/loginProfiles.js"></script>
+    <script defer src="options.js"></script>
+</head>
+<body>
+    <main class="options-page">
+        <section class="settings-card">
+            <h1>ILIAS Helper Settings</h1>
+            <p class="hint">Store credentials per host and control automatic session refresh.</p>
+            <p id="status" class="status-badge" aria-live="polite"></p>
+
+            <form id="optionsForm" autocomplete="on">
+                <label for="host">Host</label>
+                <input id="host" name="host" placeholder="e.g. ilias3.uni-stuttgart.de" autocapitalize="off" spellcheck="false" />
+
+                <label for="username">Username</label>
+                <input id="username" name="username" placeholder="Your ILIAS username" autocomplete="username" autocapitalize="off" spellcheck="false" />
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" placeholder="Your ILIAS password" autocomplete="current-password" />
+
+                <label class="toggle">
+                    <input type="checkbox" id="autoRefreshOnVisibility">
+                    <span>Refresh after tab inactivity</span>
+                </label>
+
+                <button id="saveButton" type="submit">Save Settings</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

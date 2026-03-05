@@ -1,178 +1,167 @@
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log(request);
+(function () {
+  if (window.__ILIAS_HELPER_LOADED__) {
+    return;
+  }
+  window.__ILIAS_HELPER_LOADED__ = true;
 
-  if (request.type === "refresh") loginToILIAS();
-});
+  const host = window.location.hostname;
+  let hiddenAt = Date.now();
 
-const KNOWN_LOGIN_SITES = {
-  "ilias3.uni-stuttgart.de": {
-    method: "form",
-    loginUrl:
-      "https://ilias3.uni-stuttgart.de/ilias.php?baseClass=ilstartupgui&cmd=post&fallbackCmd=doStandardAuthentication&lang=de&client_id=Uni_Stuttgart",
-    default_landing_url: "",
-    usernameField: "login_form/input_3/input_4",
-    passwordField: "login_form/input_3/input_5",
-  },
-  "www.ilias.uni-koeln.de": {
-    method: "form",
-    loginUrl:
-      "https://www.ilias.uni-koeln.de/ilias/ilias.php?lang=de&client_id=uk&cmd=post&cmdClass=ilstartupgui&cmdNode=12k&baseClass=ilStartUpGUI&rtoken=",
-    default_landing_url: "",
-    usernameField: "username",
-    passwordField: "password",
-    extraFields: ["cmd[doStandardAuthentication]", "Anmelden"],
-  },
-  "ilias.your-university.de": {
-    method: "form",
-    loginUrl:
-      "https://ilias.your-university.de/ilias.php?baseClass=ilstartupgui&cmd=post",
-    default_landing_url: "",
-    usernameField: "user",
-    passwordField: "pass",
-  },
-};
+  function sendRuntimeMessage(message) {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(message, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
+        resolve(response);
+      });
+    });
+  }
 
-async function loginToILIAS() {
-  const currentHost = window.location.hostname;
+  function showOverlay() {
+    if (document.getElementById("ilias-helper-overlay")) {
+      return;
+    }
 
-  const loginUrl = KNOWN_LOGIN_SITES[currentHost]
-    ? KNOWN_LOGIN_SITES[currentHost].loginUrl
-    : `https://${currentHost}/ilias.php?baseClass=ilstartupgui&cmd=post`;
+    const overlay = document.createElement("div");
+    overlay.id = "ilias-helper-overlay";
+    overlay.innerHTML = `
+      <div class="ilias-helper-overlay-content">
+        <p>ILIAS Helper<br>Refreshing session...</p>
+      </div>
+    `;
 
-  const formUsername = KNOWN_LOGIN_SITES[currentHost]
-    ? KNOWN_LOGIN_SITES[currentHost].usernameField
-    : "username";
+    const style = document.createElement("style");
+    style.textContent = `
+      #ilias-helper-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      .ilias-helper-overlay-content {
+        background: rgba(0, 0, 0, 0.75);
+        padding: 16px 20px;
+        border-radius: 10px;
+        font-size: 16px;
+        text-align: center;
+      }
+    `;
 
-  const formPassword = KNOWN_LOGIN_SITES[currentHost]
-    ? KNOWN_LOGIN_SITES[currentHost].passwordField
-    : "password";
+    overlay.appendChild(style);
+    document.documentElement.appendChild(overlay);
+  }
 
-  chrome.runtime.sendMessage({ action: "requestData" }, async (response) => {
-    if (!response.username || !response.password)
-      return console.error("Missing credentials");
+  function hideOverlay() {
+    const overlay = document.getElementById("ilias-helper-overlay");
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+
+  async function loginToILIAS(reason) {
+    const data = await sendRuntimeMessage({ action: "requestData", host });
+    const username = String(data?.username || "").trim();
+    const password = String(data?.password || "");
+
+    if (!username || !password) {
+      return { ok: false, skipped: true, reason: "missing_credentials" };
+    }
+
+    const profile = ILIASProfiles.resolveProfile(host);
+
+    if (reason === "visibility" && !data.settings?.autoRefreshOnVisibility) {
+      return { ok: false, skipped: true, reason: "disabled" };
+    }
 
     const formData = new FormData();
-    formData.append(formUsername, response.username);
-    formData.append(formPassword, response.password);
+    formData.append(profile.usernameField, username);
+    formData.append(profile.passwordField, password);
 
-    if (KNOWN_LOGIN_SITES[currentHost]?.extraFields?.length > 0) {
-      for (
-        let i = 0;
-        i < KNOWN_LOGIN_SITES[currentHost].extraFields.length;
-        i += 2
-      ) {
-        const key = KNOWN_LOGIN_SITES[currentHost].extraFields[i];
-        const value = KNOWN_LOGIN_SITES[currentHost].extraFields[i + 1];
-        if (key && value) {
-          formData.append(key, value);
-        }
-      }
+    Object.entries(profile.extraFields || {}).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    if (reason !== "initial") {
+      showOverlay();
     }
 
-    const fetchOptions = {
-      method: "POST",
-      headers: {
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      },
-      body: formData,
-      credentials: "include",
-    };
+    try {
+      const response = await fetch(profile.loginUrl, {
+        method: "POST",
+        headers: {
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          ...(profile.headers || {}),
+        },
+        body: formData,
+        credentials: "include",
+      });
 
-    const res = await fetch(loginUrl, fetchOptions);
-    console.log(res.ok ? "Login successful" : "Login failed", res.statusText);
-    if (res.ok) {
-      chrome.runtime.sendMessage({ action: "setBadge", text: "✔" });
-      if (
-        window.location.href.includes("login.php") ||
-        window.location.href.includes("?cmd=force_login") ||
-        window.location.href.includes(
-          "baseClass=ilrepositorygui&reloadpublic=1&cmd=&ref_id=1"
-        )
-      ) {
+      await sendRuntimeMessage({
+        action: "setBadge",
+        text: response.ok ? "✔" : "✘",
+      });
+
+      const shouldRedirect =
+        response.ok &&
+        reason === "initial" &&
+        ILIASProfiles.shouldRedirectAfterLogin(window.location.href);
+
+      console.log("[iliasHelper:content] redirect decision", {
+        host,
+        reason,
+        shouldRedirect,
+        currentUrl: window.location.href,
+      });
+
+      if (shouldRedirect) {
         window.location.href = "/";
       }
-    } else {
-      chrome.runtime.sendMessage({ action: "setBadge", text: "✘" });
+
+      return { ok: response.ok, status: response.status };
+    } finally {
+      hideOverlay();
     }
-    hideLoginOverlay();
+  }
+
+  chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
+    if (request.type !== "refresh") {
+      return false;
+    }
+
+    loginToILIAS("manual")
+      .then((result) => sendResponse(result))
+      .catch((error) =>
+        sendResponse({ ok: false, error: error.message || String(error) }),
+      );
+
+    return true;
   });
-}
 
-if (!sessionStorage.getItem("alreadyLoaded")) {
-  sessionStorage.setItem("alreadyLoaded", "true");
-  showLoginOverlay();
-  loginToILIAS();
-}
+  if (!sessionStorage.getItem("ilias-helper-initial-refresh")) {
+    sessionStorage.setItem("ilias-helper-initial-refresh", "1");
+    loginToILIAS("initial").catch(() => {});
+  }
 
-var lastTimeRecorded = Date.now();
-document.addEventListener("visibilitychange", () => {
-  const nowTime = Date.now();
-  if (nowTime - lastTimeRecorded < 120000) return; // don't do anything under 2 minutes
-  if (nowTime - lastTimeRecorded > 1800000) showLoginOverlay(); // after half an hour, wait two secs so you don't loose the current view
-  if (document.visibilityState === "visible") loginToILIAS();
-  lastTimeRecorded = Date.now();
-});
+  document.addEventListener("visibilitychange", async () => {
+    const data = await sendRuntimeMessage({ action: "requestData", host });
+    const threshold = Number(data.settings?.inactiveThresholdMs || 180000);
 
-function injectLoginOverlay() {
-  // Check if overlay already exists to avoid duplicates
-  if (document.getElementById("ilias-helper-overlay")) return;
+    if (document.visibilityState === "hidden") {
+      hiddenAt = Date.now();
+      return;
+    }
 
-  const overlay = document.createElement("div");
-  overlay.id = "ilias-helper-overlay";
-  overlay.innerHTML = `
-      <div class="overlay-content">
-          <p>ILIAS Helper<br>Logging in, hold on...</p>
-          <div class="spinner"></div>
-      </div>
-      <style>
-          #ilias-helper-overlay {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100vw;
-              height: 100vh;
-              background: rgba(0, 0, 0, 0.6);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              z-index: 9999;
-              color: white;
-              font-size: 24px;
-              text-align: center;
-              font-family: Arial, sans-serif;
-          }
-          .overlay-content {
-              background: rgba(0, 0, 0, 0.8);
-              padding: 20px;
-              border-radius: 10px;
-              box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-          }
-          .spinner {
-              margin: 20px auto;
-              width: 40px;
-              height: 40px;
-              border: 4px solid rgba(255, 255, 255, 0.3);
-              border-top: 4px solid white;
-              border-radius: 50%;
-              animation: spin 1s linear infinite;
-          }
-          @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-          }
-      </style>
-  `;
-
-  document.body.appendChild(overlay);
-}
-
-function showLoginOverlay() {
-  injectLoginOverlay(); // Ensure it's injected before showing
-  document.getElementById("ilias-helper-overlay").style.display = "flex";
-}
-
-function hideLoginOverlay() {
-  const overlay = document.getElementById("ilias-helper-overlay");
-  if (overlay) overlay.style.display = "none";
-}
+    const inactiveTime = Date.now() - hiddenAt;
+    if (inactiveTime >= threshold) {
+      loginToILIAS("visibility").catch(() => {});
+    }
+  });
+})();
